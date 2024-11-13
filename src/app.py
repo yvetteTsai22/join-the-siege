@@ -1,29 +1,45 @@
-from flask import Flask, request, jsonify
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.responses import JSONResponse
+from src.classifier import XGBoostClassifier
+from typing import Optional
 
-from src.classifier import classify_file
-app = Flask(__name__)
+app = FastAPI()
 
-ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg'}
+ALLOWED_EXTENSIONS = {"pdf", "png", "jpg"}
+
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/classify_file', methods=['POST'])
-def classify_file_route():
 
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part in the request"}), 400
+classifier = XGBoostClassifier()
 
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
+
+@app.post("/classify_file")
+async def classify_file_route(file: Optional[UploadFile] = File(None)):
+    if not file:
+        raise HTTPException(status_code=400, detail="No file provided")
 
     if not allowed_file(file.filename):
-        return jsonify({"error": f"File type not allowed"}), 400
+        raise HTTPException(status_code=400, detail="File type not allowed")
 
-    file_class = classify_file(file)
-    return jsonify({"file_class": file_class}), 200
+    filename = file.filename
+    file_class = await classifier.predict(filename)
+
+    return JSONResponse(content={"file_class": file_class})
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# endpoint to trigger model trianing
+@app.post("/train_model")
+async def train_model_route():
+    df_train, df_test = classifier.load_data()
+    scores = classifier.train_model(df_train, df_test)
+    response_content = {"message": "Model trained successfully"}
+    response_content.update(scores)
+    return JSONResponse(content=response_content)
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)
