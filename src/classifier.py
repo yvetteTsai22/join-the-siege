@@ -78,11 +78,17 @@ class XGBoostClassifier:
         )
         self.label_encoder = LabelEncoder()
 
+        import re
+
+        def clean_text(text):
+            # Remove special characters and replace underscores with spaces
+            return re.sub(r"[^a-zA-Z0-9\s]", "", text.replace("_", " "))
+
         X_train, y_train = self.tfidf_vectorizer.fit_transform(
-            df_train["filename"]
+            df_train["filename"].apply(clean_text)
         ).toarray(), self.label_encoder.fit_transform(df_train["category"])
         X_test, y_test = self.tfidf_vectorizer.transform(
-            df_test["filename"]
+            df_test["filename"].apply(clean_text)
         ).toarray(), self.label_encoder.transform(df_test["category"])
 
         import xgboost as xgb
