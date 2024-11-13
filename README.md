@@ -61,7 +61,7 @@ We encourage you to be creative! Feel free to use any libraries, tools, services
 
 4. Test the classifier using a tool like curl:
     ```shell
-    curl -X POST -F 'file=@path_to_pdf.pdf' http://127.0.0.1:5000/classify_file
+    curl -X POST -F 'file=@path_to_pdf.pdf' http://127.0.0.1:8000/classify_file
     curl -X POST -F 'file=@files/bank_statement_1.pdf' http://127.0.0.1:8000/classify_file
     ```
 
