@@ -48,9 +48,9 @@ We encourage you to be creative! Feel free to use any libraries, tools, services
     ```
 
 2. Install dependencies:
+    add your own openAI key to .env as in .env.sample
     ```shell
-    python -m venv venv
-    source venv/bin/activate
+    pipenv shell
     pip install -r requirements.txt
     ```
 
@@ -68,6 +68,15 @@ We encourage you to be creative! Feel free to use any libraries, tools, services
 5. Run tests:
    ```shell
     pytest
+    ```
+
+6. Run in docker:
+    ```shell
+    # Build the Docker image
+    docker build -t join_the_siege .
+
+    # Run the Docker container in detached mode
+    docker run -d --name join_the_siege -p 8000:8000 --env-file .env join_the_siege_app
     ```
 
 ## Submission
