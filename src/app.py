@@ -29,9 +29,15 @@ async def classify_file_route(file: Optional[UploadFile] = File(None)):
     return JSONResponse(content={"file_class": file_class})
 
 
-# endpoint to trigger model trianing
 @app.post("/train_model")
 async def train_model_route():
+    """
+    Endpoint to train the model.
+
+    This function loads the training and testing data, trains the model using the
+    training data, evaluates the model using the testing data, and returns a JSON
+    response with the training results.
+    """
     df_train, df_test = classifier.load_data()
     scores = classifier.train_model(df_train, df_test)
     response_content = {"message": "Model trained successfully"}
